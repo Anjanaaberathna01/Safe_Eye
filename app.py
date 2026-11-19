@@ -151,10 +151,14 @@ def run_classifier(model, class_names, rgb_img):
     return class_names[top_idx], float(probs[top_idx]), probs
 
 
-def extract_eye_region_crop(rgb_frame):
+# [CHANGED] තනි ඇසක square close-up crop එකක් ලබා දීමට යාවත්කාලීන කළා
+def extract_eye_region_crop(rgb_frame, cx_pct=0.43, cy_pct=0.38, box_pct=0.14):
     h, w, _ = rgb_frame.shape
-    x1, x2 = int(w * 0.25), int(w * 0.75)
-    y1, y2 = int(h * 0.22), int(h * 0.48)
+    half = int(w * box_pct * 0.5)
+    cx = int(w * cx_pct)
+    cy = int(h * cy_pct)
+    x1, y1 = max(0, cx - half), max(0, cy - half)
+    x2, y2 = min(w, cx + half), min(h, cy + half)
     if x2 > x1 and y2 > y1:
         return rgb_frame[y1:y2, x1:x2], (x1, y1, x2, y2)
     return None, None
@@ -323,6 +327,12 @@ def main():
     mirror = st.sidebar.toggle("Mirror view", value=True)
     show_eye_crop = st.sidebar.toggle("Show eye crop", value=True)
 
+    # [CHANGED] Eye crop box එක ඇස උඩට align කරගන්න sliders 3ක් එක් කළා
+    st.sidebar.subheader("Eye crop box")
+    eye_x = st.sidebar.slider("Eye box X (%)", 20, 80, 43) / 100.0
+    eye_y = st.sidebar.slider("Eye box Y (%)", 15, 70, 38) / 100.0
+    eye_size = st.sidebar.slider("Eye box size (%)", 8, 30, 14) / 100.0
+
     st.sidebar.subheader("Detection")
     frame_skip = st.sidebar.slider(
         "Predict every N frames", 1, 5, 2,
@@ -462,7 +472,8 @@ def main():
                     face_model, FACE_CLASS_NAMES, rgb_frame
                 )
                 if eye_model is not None:
-                    eye_crop, eye_box = extract_eye_region_crop(rgb_frame)
+                    # [CHANGED] Slider values සමඟ single-eye crop call කළා
+                    eye_crop, eye_box = extract_eye_region_crop(rgb_frame, eye_x, eye_y, eye_size)
                     last_eye_box, last_eye_crop = eye_box, eye_crop
                     if eye_crop is not None:
                         last_eye_class, last_eye_conf, last_eye_probs = run_classifier(
