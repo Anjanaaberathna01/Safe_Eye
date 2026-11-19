@@ -37,7 +37,6 @@ def run_classifier(model, class_names: list[str], rgb_img: np.ndarray):
 
 
 def extract_eye_region_crop(rgb_frame: np.ndarray):
-    """CascadeClassifier නොමැතිව Frame එකේ ඇස් තියෙන කලාපය Crop කරයි."""
     h, w, _ = rgb_frame.shape
     x1 = int(w * 0.25)
     x2 = int(w * 0.75)
@@ -57,11 +56,11 @@ def main():
     camera_index = st.sidebar.number_input("Webcam Index", min_value=0, max_value=5, value=0, step=1)
     frame_skip = st.sidebar.slider(
         "Predict Every N Frames", min_value=1, max_value=5, value=2,
-        help="Laptop speed එක smooth තියාගන්න frames කිහිපයකට වරක් predict කරයි."
+        help="Laptop webcams are usually 30 FPS, so predicting every 2 frames gives ~15 predictions per second."
     )
     alert_streak_threshold = st.sidebar.slider(
         "Consecutive Alert Frames", min_value=3, max_value=25, value=8,
-        help="මෙම Risk Frame ගණන දිගටම ආවොත් Alert එක පෙන්වයි."
+        help="Risky frames are consecutive frames that trigger an alert."
     )
     confidence_threshold = (
         st.sidebar.slider("Min Confidence (%)", min_value=30, max_value=95, value=60, step=5)
@@ -71,7 +70,7 @@ def main():
     try:
         face_model = load_keras_model(FACE_MODEL_PATH)
     except Exception as e:
-        st.error(f"4-Class Face Model load කරන්න බැරි වුණා: `{FACE_MODEL_PATH}`\n\nError: {e}")
+        st.error(f"Error loading face model: `{FACE_MODEL_PATH}`\n\nError: {e}")
         return
 
     eye_model = None
@@ -79,7 +78,7 @@ def main():
         eye_model = load_keras_model(EYE_MODEL_PATH)
         st.sidebar.success("✅ Eye Model Loaded")
     except Exception:
-        st.sidebar.warning("⚠️ Eye Model (`best_eye_model.keras`) හමු නොවුණා — 4-Class Face Model එක පමණක් ක්‍රියාත්මක වේ.")
+        st.sidebar.warning("⚠️ Eye Model (`best_eye_model.keras`) not found. Eye detection will be disabled.")
 
     col_cam, col_info = st.columns([2, 1])
 
@@ -107,7 +106,7 @@ def main():
     if run_cam:
         cap = cv2.VideoCapture(int(camera_index))
         if not cap.isOpened():
-            st.error("Webcam එක open කරන්න බැරි වුණා. වෙනත් Camera Index (0, 1...) එකක් try කරන්න.")
+            st.error("Cannot open webcam. Please check the camera index or ensure the webcam is connected.")
             return
 
         frame_idx = 0
@@ -120,7 +119,7 @@ def main():
             while run_cam:
                 ret, bgr_frame = cap.read()
                 if not ret:
-                    st.warning("Camera එකෙන් Frame එකක් ගන්න බැරි වුණා.")
+                    st.warning("Failed to grab frame from webcam. Stopping...")
                     break
 
                 frame_idx += 1
@@ -232,7 +231,7 @@ def main():
         finally:
             cap.release()
     else:
-        st.info("Live Webcam පටන් ගන්න වම් පස **Start Live Webcam** tick කරන්න.")
+        st.info("Webcam is not running. Check the 'Start Live Webcam' box to begin monitoring.")
 
 
 if __name__ == "__main__":
