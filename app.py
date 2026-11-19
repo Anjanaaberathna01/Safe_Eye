@@ -150,8 +150,10 @@ def run_classifier(model, class_names, rgb_img):
     top_idx = int(np.argmax(probs))
     return class_names[top_idx], float(probs[top_idx]), probs
 
+# ----------------------------------------------------------------------------
+# Image processing  
+# ----------------------------------------------------------------------------
 
-# [CHANGED] තනි ඇසක square close-up crop එකක් ලබා දීමට යාවත්කාලීන කළා
 def extract_eye_region_crop(rgb_frame, cx_pct=0.43, cy_pct=0.38, box_pct=0.14):
     h, w, _ = rgb_frame.shape
     half = int(w * box_pct * 0.5)
@@ -327,7 +329,6 @@ def main():
     mirror = st.sidebar.toggle("Mirror view", value=True)
     show_eye_crop = st.sidebar.toggle("Show eye crop", value=True)
 
-    # [CHANGED] Eye crop box එක ඇස උඩට align කරගන්න sliders 3ක් එක් කළා
     st.sidebar.subheader("Eye crop box")
     eye_x = st.sidebar.slider("Eye box X (%)", 20, 80, 43) / 100.0
     eye_y = st.sidebar.slider("Eye box Y (%)", 15, 70, 38) / 100.0
