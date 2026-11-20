@@ -6,7 +6,6 @@ import numpy as np  # type: ignore
 import streamlit as st  # type: ignore
 import streamlit.components.v1 as components  # type: ignore
 import tensorflow as tf  # type: ignore
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input  # type: ignore
 
 # ----------------------------------------------------------------------------
 # Config
@@ -142,13 +141,30 @@ def load_keras_model(path: str):
     return tf.keras.models.load_model(path)
 
 
+
 def run_classifier(model, class_names, rgb_img):
-    resized = cv2.resize(rgb_img, IMG_SIZE, interpolation=cv2.INTER_AREA)
-    img_array = np.expand_dims(resized.astype(np.float32), axis=0)
-    processed = preprocess_input(img_array)
-    probs = model.predict(processed, verbose=0)[0]
+    resized = cv2.resize(
+        rgb_img,
+        IMG_SIZE,
+        interpolation=cv2.INTER_AREA
+    )
+
+    # Keep pixels in the original 0-255 range.
+    # preprocess_input() is already included inside the trained model.
+    img_array = np.expand_dims(
+        resized.astype(np.float32),
+        axis=0
+    )
+
+    probs = model.predict(img_array, verbose=0)[0]
+
     top_idx = int(np.argmax(probs))
-    return class_names[top_idx], float(probs[top_idx]), probs
+
+    return (
+        class_names[top_idx],
+        float(probs[top_idx]),
+        probs
+    )
 
 # ----------------------------------------------------------------------------
 # Image processing  

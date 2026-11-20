@@ -1,9 +1,9 @@
 import os
-import numpy as np
-import matplotlib.pyplot as plt
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt # type: ignore
 import seaborn as sns  # type: ignore
-import tensorflow as tf
-from sklearn.metrics import confusion_matrix, classification_report
+import tensorflow as tf # type: ignore
+from sklearn.metrics import confusion_matrix, classification_report # type: ignore
 from tensorflow.keras import layers, models  # type: ignore
 from tensorflow.keras.applications import MobileNetV2  # type: ignore
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input  # type: ignore
