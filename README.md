@@ -102,7 +102,3 @@ DriveGuard AI is a learning and research project. It is not a certified safety d
 - [OpenCV](https://opencv.org/)
 - [Streamlit](https://streamlit.io/)
 - [NumPy](https://numpy.org/)
-
-## License
-
-Add your license here (for example MIT).
